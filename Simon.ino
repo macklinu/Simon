@@ -12,64 +12,71 @@
  http://www.arduino.cc/en/Tutorial/Debounce
  */
 
+#include "pitches.h"                // add pitches header file to reference note frequencies
 
+const int gameSize = 20;            // number of steps
+const int numButtons = 4;           // number of buttons (and also LEDs)
 
-#include "pitches.h"        // add pitches header file to reference note frequencies
+const int speakerPin = 9;           // initialize speaker pin
 
-const int gameSize = 20;          // number of steps
-const int numButtons = 4;
-
-const int speakerPin = 9;   // initialize speaker pin
-
-int buttonPin[] = {         // initialize button pins
+const int buttonPin[] = {                 // initialize button pins
   2, 3, 4, 5};
-int ledPin[] = {            // initialize LED pins
+const int ledPin[] = {                    // initialize LED pins
   10, 11, 12, 13};
 int buttonState[numButtons];
 int buttonPrevious[numButtons];     // for debouncing purposes
 int buttonPushCounter[numButtons];
 
-long time[numButtons] = {
-  0, 0, 0, 0};         // the last time the output pin was toggled
-long debounce = 5;   // the debounce time, increase if the output flickers
+long time[numButtons];              // the last time the output pin was toggled
+long debounce = 5;                  // the debounce time, increase if the output flickers
 
 int ledState[numButtons];
 
-const int i_to_a = 97;
-
-char simonInputArray[gameSize];
-char simonMasterArray[gameSize];
+int simonInputArray[gameSize];      // array to determine
+int simonMasterArray[gameSize];     // array that input will be checked against
 int inputCounter = 0;
+
+int currentStep;
+
 
 int buttonTone[numButtons] = {
   NOTE_C3, NOTE_E3, NOTE_G3, NOTE_C4};
 
+boolean game_init = true;
+
 void setup() {
   // open serial communication
   Serial.begin(9600);
-  // initialize button pins, led pins, button states,  and other variable arrays
+  // initialize button pins, led pins, button states, and other variable arrays
   for (int i = 0; i < numButtons; i++) {
     pinMode(buttonPin[i], INPUT_PULLUP);
     pinMode(ledPin[i], OUTPUT);
     digitalWrite(buttonPin[i], HIGH);
     buttonPrevious[i] = LOW;
     ledState[i] = LOW;
+    time[i] = 0;
   }
-  // the sum of all analog inputs creates a truly random seed every time
-  randomSeed(analogRead(A0+A1+A2+A3+A4+A5));
-  for (int i = 0; i < gameSize; i++) {
-    // use that random seed to create a unique Simon array that will be checked against the input button presses
-    int randomNum = random(numButtons);
-    char masterChar = char(randomNum + i_to_a);
-    simonMasterArray[i] = masterChar;
-  }
-  // prints out master array for debugging purposes
-  Serial.println(simonMasterArray);
 }
 
 void loop() {
-  for (int i = 0; i < numButtons; i++) {
+  // initialzing game setup
+    gameSetup();
+    for (int i = 0; i < numButtons; i++) {
     checkButton(i);
+  }
+}
+
+void gameSetup() {
+  // this will only be run once at the beginning of each game
+  if (game_init) {
+    // the sum of all analog inputs creates a truly random seed for the Simon sequence
+    randomSeed(analogRead(A0+A1+A2+A3+A4+A5));
+    // assign a random value to each number in the Simon sequence
+    for (int i = 0; i < gameSize; i++) {
+      simonMasterArray[i] = random(numButtons);
+    }
+    // don't come back to gameSetup() until this flag is flipped
+    !game_init;
   }
 }
 
@@ -82,7 +89,7 @@ void checkButton(int i) {
     // turn on the corresponding LED
     digitalWrite(ledPin[i], HIGH);
     // play a tone
-    tone(speakerPin, buttonTone[i], 200);
+    // tone(speakerPin, buttonTone[i], 200);
     // wait
     delay(200);
     // turn off the corresponding LED
@@ -93,18 +100,17 @@ void checkButton(int i) {
     boolean buttonWriteText = true;
     if (buttonWriteText) {
       // anything that needs to happen only once happens here
-      char inputChar = char(i + i_to_a);
-      simonInputArray[inputCounter] = inputChar;
+      simonInputArray[inputCounter] = i;
       Serial.print("MASTER:");
       Serial.print("\t");
-      Serial.println(simonMasterArray);
+      Serial.println(simonMasterArray[i]);
       Serial.print("INPUT:");
       Serial.print("\t");
-      Serial.println(simonInputArray);
+      Serial.println(simonInputArray[i]);
       Serial.print("Index of array: ");
       Serial.println(inputCounter++);
       Serial.print("Input character: ");
-      Serial.println(inputChar);
+      Serial.println(i);
       if (simonInputArray[i] == simonMasterArray[i]) {
         Serial.println("MATCH");
       }
@@ -121,6 +127,8 @@ void checkButton(int i) {
   // update the previous button state for button debouncing purposes
   buttonPrevious[i] = buttonState[i];
 }
+
+
 
 
 
