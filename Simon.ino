@@ -60,8 +60,8 @@ void setup() {
 
 void loop() {
   // initialzing game setup
-    gameSetup();
-    for (int i = 0; i < numButtons; i++) {
+  gameSetup();
+  for (int i = 0; i < numButtons; i++) {
     checkButton(i);
   }
 }
@@ -74,10 +74,15 @@ void gameSetup() {
     // assign a random value to each number in the Simon sequence
     for (int i = 0; i < gameSize; i++) {
       simonMasterArray[i] = random(numButtons);
+      Serial.print(simonMasterArray[i]);
     }
-    // don't come back to gameSetup() until this flag is flipped
-    !game_init;
   }
+  // don't come back to gameSetup() until this flag is flipped
+  game_init = false;
+}
+
+int checkButton(int i) {
+
 }
 
 void checkButton(int i) {
@@ -127,6 +132,7 @@ void checkButton(int i) {
   // update the previous button state for button debouncing purposes
   buttonPrevious[i] = buttonState[i];
 }
+
 
 
 
