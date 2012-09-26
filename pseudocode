@@ -1,0 +1,110 @@
+include pitches.h;
+include softwareserial.h;
+
+totalGameLength = 20;
+
+currentStep;
+levelLength;
+
+LCDpin = 8;
+speakerPin = 9;
+buttonPin[4];
+ledPin[4];
+
+buttonState[];
+buttonPrevious[];
+
+buttonTimes;
+buttonDebounce;
+buttonPressTimes;
+
+listenToInput = false by default
+
+void setup() {
+	open serial connection;
+	open LCD connection;
+	set buttonPins to INPUT_PULLUP;
+	set ledPins to OUTPUT;
+	digitalWrite(buttonPins, HIGH);
+	buttonTimes = 0;
+
+}
+
+void loop() {
+	if (gameSetup) {
+		reinitialize all variables like in setup()?
+		set levelLength back to 3 or so to start;
+		ledLightLength = 250;
+	}
+	if (gameIntro) {
+		display instructions about what to on LCD;
+		press certain buttons to start the game;
+		if (correctButtonCombo) {
+			start the game;
+			gameStart = true;
+			gameIntro = false;
+		}
+	}
+	if (gameStart) {
+		if (playbackSequence) {
+			playback the LED;
+			delay between playback is long at first, then decreases as the game continues to speed up and make the game more difficult;
+			maybe a countdown with a beep to tell user to start input;
+			listenToInput = true;
+			playbackSequence = false;
+		}
+		if (listenToInput) {
+			read button presses;
+			if (button press <  {
+				Display "Not quick enough!" on LCD;
+				gameOver();
+			}
+			for each button press... 
+				write that index into the input array;
+				if (input == simon) {
+					inputCounter += 1;
+					lightLED(led of button press, ledLength);
+					playTone(tone of button, toneLength);
+					if (inputCounter == levelLength) {
+						levelLength += 1;
+						if (levelLength == totalGameLength) {
+							youWinTheGame();
+						}
+						winLevel();
+					}
+					continue reading input;
+				}
+				if (input != simon) {
+					gameOver();
+				}
+		}
+	}
+}
+
+void winLevel() {
+	you've won the level!
+	display "Correct!" on the LCD screen;
+	play some sort of celebratory thing with lights and sounds;
+	ledLightLength -= 10 to make everything faster;
+	listenToInput = false;
+}
+
+void youWinTheGame() {
+	flash the LEDs in sucession;
+	display "You are the champion!" on the LCD screen;
+	play a song with all the LEDs on;
+	display rolling credits on the LCD screen like a video game;
+	when that's done {
+		gameStart = false;
+		listenToInput = false;
+		gameIntro = false;
+		gameSetup = true; (go there)
+	}
+}
+
+void gameOver() {
+	play a low tone;
+	turn all LEDs on for while the tone is playing;
+	display "Game over!" on LCD screen;
+	go to 
+}
