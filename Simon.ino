@@ -15,9 +15,6 @@ http://www.arduino.cc/en/Tutorial/Debounce
 #include "pitches.h"                // add pitches header file to reference note frequencies
 #include <SoftwareSerial.h>         // include Software Serial library
 
-const int totalGameLength = 20;     // number of steps
-const int numButtons = 4;           // number of buttons (and also LEDs)
-
 SoftwareSerial mySerial(7,8);       // we will use "software serial" Rx pin 7, Tx pin 8
 const int speakerPin = 9;           // initialize speaker pin
 
@@ -25,6 +22,10 @@ const int buttonPin[] = {           // initialize button pins
 2, 3, 4, 5};
 const int ledPin[] = {              // initialize LED pins
 10, 11, 12, 13};
+
+const int totalGameLength = 20;     // number of steps
+const int numButtons = 4;           // number of buttons (and also LEDs)
+
 int buttonState[numButtons];
 int buttonPrevious[numButtons];     // for debouncing purposes
 int buttonPushCounter[numButtons];
