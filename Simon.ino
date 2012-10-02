@@ -19,7 +19,8 @@ const int ledPin[] = {                    	// initialize LED pins
 10, 11, 12, 13};
 
 // constants
-const int totalGameLength = 20;           	// number of steps (number of levels in game = this - 3)
+// 16 levels
+const int totalGameLength = 19;           	// number of steps (number of levels in game = this - 3)
 const int numButtons = 4;                 	// number of buttons (and also LEDs and tones)
 
 // game states
@@ -64,7 +65,7 @@ int noteDurations[] = {						// note durations in correspondence with this melod
 void setup() {
 	// open Serial and LCD communication
 	Serial.begin(9600);
-  	mySerial.begin(57600);
+  	mySerial.begin(9600);
   	// clear LCD screen (just in case)
  	lcdClear();
  	// set your pin states
@@ -99,6 +100,8 @@ void loop() {
 			// exit this statement
 			playback_sequence = false;
 			// move to the user input
+			// but first write on the LCD screen that it's the user's turn to respond
+			levelText("Your turn!");
 			gametime = true;
 		}
 		// where gameplay actually takes place
@@ -113,13 +116,25 @@ void loop() {
 	}
 }
 
+// a function to display the level text with different bottom row text depending on if it is Simon or the user's turn
+void levelText(String bottomRow) {
+	lcdClear();
+	lcdPrint("Level");
+	lcdSetCursor(0,6);
+	// the level is offset by two to make more sense (starts from level 1)
+	lcdPrint(levelLength - 2);
+	lcdSetCursor(1,0);
+	lcdPrint(bottomRow);
+}
+
 // initialize game variables
 void gameSetup() {
 	// Notify user that the next game is being set up on the LCD screen
 	lcdClear();
-	lcdPrint("Setting up game");
+	lcdSetCursor(0,5);
+	lcdPrint("Simon");
 	lcdSetCursor(1,0);
-	lcdPrint("...");
+	lcdPrint("Setting up game");
 	delay(2000);
 	lcdClear();
 	// generate the Simon sequence
@@ -160,11 +175,10 @@ void gameIntro() {
 	// write text to LCD to instruct user how to begin the game
 	if (write_intro_text) {
 		// print "Press start to begin"
-		lcdPrint("Press outside");
+		lcdSetCursor(0,3);
+		lcdPrint("Press any");
 		lcdSetCursor(1,0);
-		lcdPrint("buttons to begin");
-		digitalWrite(ledPin[0], HIGH);
-		digitalWrite(ledPin[3], HIGH);
+		lcdPrint("button to begin!");
 		write_intro_text = false;
 	}
 	// digitalWrite(ledPin[0], HIGH);
@@ -172,26 +186,32 @@ void gameIntro() {
 	for (int i = 0; i < numButtons; i++) {
 		// wait for button press input
 		readButton(i);
-		// if the user pressed the outside buttons, the game will begin
-		if (buttonState[i] == LOW && buttonState[3] == LOW) {
-			// clear the LCD and move into gameplay
-			lcdClear();
-			// digitalWrite(ledPin[0], LOW);
-			// digitalWrite(ledPin[3], LOW);
-			playback_sequence = true;
-			game_start = true;
+		// if any button is pressed, start the game
+		// debounce the button; if the state has changed and enough time has gone by to confirm that there was no bouncing...
+		if (buttonState[i] == LOW && buttonPrevious[i] == HIGH && millis() - buttonDebounceTime[i] > debounceTime) {
+			// means button was pressed
+			button_actually_pressed[i] = true;
+			// check the input once and perform an action based on that input
+			if (button_actually_pressed[i]) {
+				lcdClear();
+				// digitalWrite(ledPin[0], LOW);
+				// digitalWrite(ledPin[3], LOW);
+				playback_sequence = true;
+				game_start = true;
+				button_actually_pressed[i] = false;
+			}
+		// set time of button to current time of program for debounce checking later
+		buttonDebounceTime[i] = millis(); 
 		}
+	// update this to check again
+	buttonPrevious[i] = buttonState[i];	
 	}
 }
 
 void playbackSimonSequence(int lengthOfLED) {
 	// if the game isn't over, write what level you are on
 	if (!game_over) {
-		lcdClear();
-		lcdPrint("Level");
-		lcdSetCursor(1,0);
-		// the level is offset by two to make more sense (starts from level 1)
-		lcdPrint(levelLength - 2);
+		levelText("Simon says...");
 	}
 	// depending on what level you are on, play back the Simon sequence
 	for (int i = 0; i < levelLength; i++) {
@@ -273,9 +293,7 @@ void lightsAndBeeps(int i, int lengthOfLED) {
 void winLevel() {
 	// print something that lets the user know they were successful
 	lcdClear();
-	lcdPrint("Nice!");
-	lcdSetCursor(1,0);
-	lcdPrint("...");
+	lcdPrint("Success!");
 	// a little audiovisual cue that you have completed the level
 	for (int i = 0; i < numButtons; i++) {
 		digitalWrite(ledPin[i], HIGH);
@@ -286,7 +304,7 @@ void winLevel() {
 		delay(50);
 	}
 	// decrease speed between LED flashes and button reading to make game more difficult
-	gameSpeed -= 10;
+	gameSpeed -= 20;
 	// go to the next level; add one more instance to the Simon sequence
 	levelLength++;
 	// set input counter back to 0 to start the next level from the beginning of the array
@@ -311,7 +329,7 @@ void gameOver() {
 		// print "You Lose!" or something along those lines once
 		lcdPrint("Game over");
 		lcdSetCursor(1,0);
-		lcdPrint("The answer:");
+		lcdPrint("Simons wins!");
 		game_over_text = false;
 	}
 	// play a low buzzer tone and light all lights; an audiovisual cue that is easily distinguishable from winning a level
@@ -341,9 +359,10 @@ void youWinTheGame() {
 	boolean game_won_text = true;
 	if (game_won_text) {
 		lcdClear();
-		lcdPrint("YOU WIN");
+		lcdSetCursor(0,4);
+		lcdPrint("You beat");
 		lcdSetCursor(1,0);
-		lcdPrint("THE GAME");
+		lcdPrint("The mighty Simon");
 		game_won_text = false;
 	}
 	// play a little tune!
