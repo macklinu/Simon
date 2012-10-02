@@ -163,6 +163,8 @@ void gameIntro() {
 		lcdPrint("Press outside");
 		lcdSetCursor(1,0);
 		lcdPrint("buttons to begin");
+		digitalWrite(ledPin[0], HIGH);
+		digitalWrite(ledPin[3], HIGH);
 		write_intro_text = false;
 	}
 	// digitalWrite(ledPin[0], HIGH);
