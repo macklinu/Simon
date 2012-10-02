@@ -4,7 +4,7 @@ Updated: 10/02/2012
 
 Using 4 LEDs, 4 buttons, an LCD display, an 8-ohm speaker, and an Arduino, you can play the classic Simon game.
 
-![](https://raw.github.com/macklinu/Simon/master/Simon.jpg)
+![](https://raw.github.com/macklinu/Simon/master/Images/Simon.jpg)
 
 # How to install:
 
@@ -12,8 +12,8 @@ Using 4 LEDs, 4 buttons, an LCD display, an 8-ohm speaker, and an Arduino, you c
 ### Parts
 * (**1**) [Arduino Uno](https://www.sparkfun.com/products/11021)
 * (**1**) [breadboard](https://www.sparkfun.com/products/112)
-* (**4**) [buttons]
-* (**4**) [LEDs](https://www.sparkfun.com/products/9592)(any color)
+* (**4**) buttons
+* (**4**) [LEDs](https://www.sparkfun.com/products/9592) (any color)
 * (**1**) [LCD display](http://www.newhavendisplay.com/nhd0216szfspggbwnonstocked-sample-quantities-available-p-333.html)
 * (**1**) [speaker](https://www.sparkfun.com/products/10722)
 * (**5**) resistors
@@ -24,7 +24,7 @@ Using 4 LEDs, 4 buttons, an LCD display, an 8-ohm speaker, and an Arduino, you c
 
 
 ### Schematic
-![](https://raw.github.com/macklinu/Simon/master/diagram.png)
+![](https://raw.github.com/macklinu/Simon/master/Diagrams/diagram.png)
 
 
 ## Software
